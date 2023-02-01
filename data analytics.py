@@ -11,6 +11,10 @@ car = pd.read_csv('CarSharing.csv', parse_dates=['timestamp'])
 car.drop_duplicates(inplace=True)
 car.dropna(inplace=True)
 
+"""
+Using appropriate hypothesis testing to determine if there is a significant relationship 
+between each column (except the timestamp column) and the demand rate
+"""
 # performing a one way ANOVA for the categorical variables
 categories = ['season', 'holiday', 'workingday', 'weather']
 
@@ -39,7 +43,11 @@ test.fit(x, y)
 
 for i, (p_value) in enumerate(test.pvalues_):
     print('For {}, the p-value is {}'.format(numeric[i], p_value))
-    
+ 
+"""
+Check to see if there is any seasonal or cyclic pattern in the temp, humidity,
+windspeed, or demand data in 2017
+"""
 # changing timestamp column to datetime
 car['timestamp'] = pd.to_datetime(car['timestamp'])
 
@@ -52,8 +60,7 @@ car_2017 = car.loc['2017']
 # subsetting temp data
 temp_2017 = car_2017['temp']
 # Multiplicative Decomposition 
-result_mul = seasonal_decompose(temp_2017, model='multiplicative', extrapolate_trend = 0,
-                                period = 1500)
+result_mul = seasonal_decompose(temp_2017, model='multiplicative', extrapolate_trend = 0, period = 1500)
 # Additive Decomposition
 result_add = seasonal_decompose(temp_2017, model='additive', extrapolate_trend=0, period = 1500)
 # Plot
@@ -89,6 +96,9 @@ plt.rcParams.update({'figure.figsize': (10,10)})
 result_add.plot().suptitle('Additive Decompose')
 plt.show()
 
+"""
+Use an ARIMA model to predict the weekly average demand rate considering 30 percent of data for testing
+"""
 # predicting weekly average demand rate using arima model
 from statsmodels.tsa.arima_model import ARIMA
 week = car['demand'].resample('W').mean()
@@ -101,6 +111,10 @@ model_fit = model.fit()
 pred = model_fit.forecast(len(test_car))[0]
 print(pred)
 
+"""
+Use a random forest regressor and a deep neural network to predict the demand rate and 
+report the minimum square error for each model. Which one is working better?
+"""
 # comparing between random forest with deep neural network
 from sklearn.preprocessing import StandardScaler
 num = car.select_dtypes(include=['float64', 'int64'])
@@ -136,7 +150,12 @@ mse_deepn = mean_squared_error(y_test, deepn_pred)
 print(f'MSE for Random Forest Regressor is {mse_randomf}')
 print(f'MSE for Deep Neural Network is {mse_deepn}')
 
-
+"""
+Categorize the demand rate into the following two groups: demand rates greater than the 
+average demand rate and demand rates less than the average demand rate.
+Now, use three different classifiers to predict the demand rates’ labels and report the accuracy of all models. Use 30 percent 
+of data for testing.
+"""
 # categorizing the demand rate
 import numpy as np
 avg_demand = num['demand'].mean()
@@ -173,7 +192,10 @@ print(f'Logistic Regression accuracy score is {log_acc}')
 print(f'Decision Tree Classifier accuracy score {dec_acc}')
 print(f'SVC accuracy score is {svm_acc}')
 
-
+"""
+Assume k is the number of clusters. Set k=2, 3, 4, and 12 and cluster the 
+temp data in 2017. Which k gives the most uniform clusters?
+"""
 # creating clusters using data in 2017 only 
 from sklearn.cluster import KMeans
 
